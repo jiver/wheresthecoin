@@ -15,7 +15,7 @@ Venice Margarette Juanillas
 
 * Preload things before enabling start button
 * Organize folders.
-
+* Update javascript libraries.
 
 
 
