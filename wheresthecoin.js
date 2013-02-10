@@ -26,6 +26,9 @@ var anim;
 var randomStart;
 var coinPos;
 
+
+
+
 function startGame(){
         //cupCount = document.getElementById("cupCountInput").value;
 //	alert(document.getElementById("cupCountInput").value);
@@ -464,81 +467,49 @@ function preAnimateCoin(coin,cup){
         moveForwardCup.start();
 }
 
-function swap(a,b,coin,randomStart){
-        //alert(a+" "+b+" "+coin);
-        var move_prev = {z:0 };
-        var move_new = {z:100 };
-        
-        var position = { x : scene.children[a].position.x};
-        var target1 = { x : scene.children[b].position.x};
-        
-        var swaptime = speeds[level]-200;
-        if(Math.abs(position.x-target1.x)>400){
-                swaptime = speeds[level];
-        }
-
-        var moveBackward = new TWEEN.Tween(move_new).to(move_prev, forwardtime[level]).easing(TWEEN.Easing.Elastic.EaseOut);
-                
-                moveBackward.onUpdate(function(){
-                        /*if(a == randomStart || b == randomStart){
-                                scene.children[ coin ].position.z = move_new.z;
-                        }*/
-                        scene.children[ a ].position.z = move_new.z;
-                });
-        
-        var tween = new TWEEN.Tween(position).to(target1, swaptime);//.easing(easing);
-                tween.easing(TWEEN.Easing.Elastic.EaseInOut);
-                tween.onUpdate(function(){
-                /*	if(a == randomStart || b == randomStart){
-                                scene.children[ coin ].position.x = position.x;
-                        }*/
-                        scene.children[ a ].position.x = position.x;
-                });
-        tween.chain(moveBackward);
-        
-        var moveForward = new TWEEN.Tween(move_prev).to(move_new, forwardtime[level]).easing(TWEEN.Easing.Elastic.EaseOut);
-                moveForward.onUpdate(function(){
-                        /*if(a == randomStart || b == randomStart){
-                                scene.children[ coin ].position.z = move_prev.z;
-                        }*/
-                        scene.children[ a ].position.z = move_prev.z;
-                });
-        moveForward.chain(tween);
-        //
-        var move_new2 = {z:100 };
-        var move_prev2 = {z:0 };
-        var moveForward2 = new TWEEN.Tween(move_new2).to(move_prev2, forwardtime[level]).easing(TWEEN.Easing.Elastic.EaseOut);
-                moveForward2.onUpdate(function(){
-                        /*if(a == randomStart || b == randomStart){
-                                scene.children[ coin ].position.z = move_new2.z;
-                        }*/
-                        scene.children[ b ].position.z = move_new2.z;
-                });
-        
-        var tween2 = new TWEEN.Tween(target1).to(position, swaptime);//.easing(easing);
-                tween2.easing(TWEEN.Easing.Elastic.EaseInOut);
-                tween2.onUpdate(function(){
-                        /*if(a == randomStart || b == randomStart){
-                                scene.children[ coin ].position.x = target1.x;
-                        }*/
-                        scene.children[ b ].position.x = target1.x;
-                });
-        tween2.chain(moveForward2);
-        
-        var moveBackward2 = new TWEEN.Tween(move_prev2).to(move_new2, forwardtime[level]).easing(TWEEN.Easing.Elastic.EaseOut);		
-                moveBackward2.onUpdate(function(){
-                        /*if(a == randomStart || b == randomStart){
-                                scene.children[ coin ].position.z = move_prev2.z;
-                        }*/
-                        scene.children[ b ].position.z = move_prev2.z;
-                });
-        moveBackward2.chain(tween2);
-        
-        
-        moveBackward2.start();
-        moveForward.start();
+function swap(a,b,coin,coin_pos){
+    
+    var a_animation = createSwapTween( a, b );
+    var b_animation = createSwapTween( b, a );
+    
+    a_animation.start();
+    b_animation.start();
 }
 
+
+function createSwapTween( source_cup, destination_cup ) {
+    var Z_BASE = {z:0 };
+    var Z_OFFSET = {z:100 };
+    
+    var current_location = { x : scene.children[source_cup].position.x};
+    var new_location = { x : scene.children[destination_cup].position.x};
+
+    var swaptime = speeds[level]-200;
+    
+    if( Math.abs( current_location.x - new_location.x ) > 400 ){
+        swaptime = speeds[level];
+    }
+
+    var moveBackward = new TWEEN.Tween(Z_OFFSET).to(Z_BASE, forwardtime[level]).easing(TWEEN.Easing.Elastic.EaseOut);        
+    moveBackward.onUpdate(function(){
+        scene.children[ source_cup ].position.z = Z_OFFSET.z;
+    });
+
+    var tween = new TWEEN.Tween(current_location).to(new_location, swaptime).easing(TWEEN.Easing.Elastic.EaseInOut);
+    tween.onUpdate(function(){
+        scene.children[ source_cup].position.x = current_location.x;
+    });
+
+    var moveForward = new TWEEN.Tween(Z_BASE).to(Z_OFFSET, forwardtime[level]).easing(TWEEN.Easing.Elastic.EaseOut);
+    moveForward.onUpdate(function(){
+        scene.children[ source_cup].position.z = Z_BASE.z;
+    });
+    
+    tween.chain(moveBackward);
+    moveForward.chain(tween);
+    
+    return moveForward;
+}
 
 function generateTexture() {
 
@@ -575,13 +546,8 @@ function animate() {
 
         requestAnimationFrame( animate );
         
-        
-        
-        
         render();
         stats.update();
-        
-        
 
 }
 
